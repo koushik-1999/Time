@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🌍 Auto Timezone Clock</title>
+    <!-- Disable caching -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -26,10 +30,7 @@
             text-align: center;
             box-shadow: 0 30px 80px rgba(0,0,0,0.6);
         }
-        .logo {
-            font-size: 3rem;
-            margin-bottom: 10px;
-        }
+        .logo { font-size: 3rem; margin-bottom: 10px; }
         h1 {
             color: #fff;
             font-size: 1.5rem;
@@ -60,11 +61,7 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.2; }
         }
-        .date {
-            color: rgba(255,255,255,0.7);
-            font-size: 1.2rem;
-            margin-bottom: 6px;
-        }
+        .date { color: rgba(255,255,255,0.7); font-size: 1.2rem; margin-bottom: 6px; }
         .tz-info {
             color: rgba(255,255,255,0.4);
             font-size: 0.9rem;
@@ -102,10 +99,7 @@
             font-size: 0.6rem;
             letter-spacing: 1px;
         }
-        .loading {
-            color: rgba(255,255,255,0.3);
-            font-size: 1rem;
-        }
+        .loading { color: rgba(255,255,255,0.3); font-size: 1rem; }
     </style>
 </head>
 <body>
@@ -124,11 +118,25 @@
     </div>
 
     <script>
+        // ===== CONFIG =====
         const API_URL = '/api/current-utc.js';
-        
+        let intervalId = null;
+
+        // ===== FETCH TIME (NO CACHE) =====
         async function fetchTime() {
+            const timestamp = Date.now();
+            const url = `${API_URL}?t=${timestamp}&_=${Math.random()}`;
+            
             try {
-                const res = await fetch(API_URL);
+                const res = await fetch(url, {
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                });
+                
+                if (!res.ok) throw new Error('Network error');
                 const data = await res.json();
                 
                 // Update clock
@@ -142,8 +150,7 @@
                     `${data.dayOfWeek}, ${data.date}`;
                 document.getElementById('tz').textContent = 
                     `📍 ${data.timeZone}`;
-                document.getElementById('status').textContent = 
-                    '✅ Auto-Detected';
+                document.getElementById('status').textContent = '✅ Auto-Detected';
                 document.getElementById('status').style.borderColor = '#34d399';
                 
                 document.getElementById('json').textContent = 
@@ -155,9 +162,32 @@
                 document.getElementById('status').textContent = '⚠️ Error';
             }
         }
-        
+
+        // ===== FORCE REFRESH ON TAB FOCUS =====
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                // Tab is visible again - immediate refresh
+                console.log('🔄 Tab focused - Refreshing...');
+                clearInterval(intervalId);
+                fetchTime();
+                // Restart interval
+                intervalId = setInterval(fetchTime, 1000);
+            }
+        });
+
+        // ===== PAGE LOAD =====
         fetchTime();
-        setInterval(fetchTime, 1000);
+        intervalId = setInterval(fetchTime, 1000);
+
+        // ===== PREVENT BACK/FORWARD CACHE =====
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                console.log('🔄 Page from bfcache - Refreshing...');
+                fetchTime();
+            }
+        });
+
+        console.log('✅ Clock started with auto-refresh on focus');
     </script>
 </body>
 </html>
