@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🌍 World Clock</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 { text-align: center; color: #333; margin-bottom: 20px; }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        select, button {
+            padding: 10px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        select { flex: 1; }
+        button {
+            background: #667eea;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover { background: #764ba2; transform: scale(1.05); }
+        .clock {
+            background: #f0f0f0;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .time {
+            font-size: 3.5rem;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            color: #333;
+        }
+        .date { font-size: 1.3rem; color: #555; margin-top: 10px; }
+        .info { margin-top: 10px; color: #666; font-size: 1rem; }
+        .json-box {
+            background: #2d3748;
+            color: #68d391;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌍 World Clock</h1>
+        <div class="controls">
+            <select id="timezone">
+                <option value="UTC">🌐 UTC</option>
+                <option value="IST">🇮🇳 IST</option>
+                <option value="EST">🇺🇸 EST</option>
+                <option value="PST">🇺🇸 PST</option>
+                <option value="GMT">🇬🇧 GMT</option>
+                <option value="JST">🇯🇵 JST</option>
+            </select>
+            <button onclick="fetchTime()">🔄 Refresh</button>
+        </div>
+        <div class="clock">
+            <div class="time" id="clock">--:--:--</div>
+            <div class="date" id="date">Loading...</div>
+            <div class="info" id="info">UTC</div>
+        </div>
+        <div class="json-box" id="json">Loading...</div>
+    </div>
+    <script>
+        async function fetchTime() {
+            const tz = document.getElementById('timezone').value;
+            const url = `https://time-psi-five.vercel.app/api/current-utc?timezone=${tz}`;
+            
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                
+                document.getElementById('clock').textContent = 
+                    `${String(data.hour).padStart(2,'0')}:${String(data.minute).padStart(2,'0')}:${String(data.seconds).padStart(2,'0')}`;
+                document.getElementById('date').textContent = `${data.dayOfWeek}, ${data.date}`;
+                document.getElementById('info').textContent = `🕐 ${data.timeZone}`;
+                document.getElementById('json').textContent = JSON.stringify(data, null, 2);
+            } catch(e) {
+                document.getElementById('json').textContent = '❌ Error: ' + e.message;
+            }
+        }
+        
+        fetchTime();
+        setInterval(fetchTime, 1000);
+    </script>
+</body>
+</html>
