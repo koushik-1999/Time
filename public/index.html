@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌍 World Clock - UTC Time</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🌍 World Clock</h1>
+        
+        <div class="controls">
+            <select id="timezoneSelect">
+                <option value="UTC">🌐 UTC</option>
+                <option value="IST">🇮🇳 India (IST)</option>
+                <option value="EST">🇺🇸 New York (EST)</option>
+                <option value="PST">🇺🇸 Los Angeles (PST)</option>
+                <option value="GMT">🇬🇧 London (GMT)</option>
+                <option value="JST">🇯🇵 Tokyo (JST)</option>
+                <option value="AEDT">🇦🇺 Sydney (AEDT)</option>
+            </select>
+            <button id="refreshBtn">🔄 Refresh</button>
+        </div>
+
+        <div class="clock-card">
+            <div class="time-display">
+                <span id="hours">00</span>
+                <span class="colon">:</span>
+                <span id="minutes">00</span>
+                <span class="colon">:</span>
+                <span id="seconds">00</span>
+            </div>
+            <div class="date-display">
+                <span id="date">January 1, 2026</span>
+            </div>
+            <div class="info-display">
+                <span id="day">Monday</span>
+                <span id="timezone-label">UTC</span>
+            </div>
+        </div>
+
+        <div class="raw-data">
+            <h3>📡 Raw API Response</h3>
+            <pre id="jsonData">Loading...</pre>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
