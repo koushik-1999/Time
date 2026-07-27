@@ -1,46 +1,40 @@
-const express = require('express');
-const app = express();
-const port = 3000;
-
-app.get('/api/current-utc', (req, res) => {
+module.exports = (req, res) => {
     const now = new Date();
+    const timezone = req.query.timezone || 'UTC'; // ?timezone=IST
     
-    // UTC time components
-    const utcYear = now.getUTCFullYear();
-    const utcMonth = String(now.getUTCMonth() + 1).padStart(2, '0');
-    const utcDay = String(now.getUTCDate()).padStart(2, '0');
-    const utcHour = String(now.getUTCHours()).padStart(2, '0');
-    const utcMinute = String(now.getUTCMinutes()).padStart(2, '0');
-    const utcSeconds = String(now.getUTCSeconds()).padStart(2, '0');
-    const utcMilliseconds = String(now.getUTCMilliseconds()).padStart(3, '0');
+    // Timezone options
+    const timezones = {
+        'UTC': 'UTC',
+        'IST': 'Asia/Kolkata',
+        'EST': 'America/New_York',
+        'PST': 'America/Los_Angeles',
+        'GMT': 'GMT',
+        'JST': 'Asia/Tokyo',
+        'AEDT': 'Australia/Sydney'
+    };
     
-    // Day of week
-    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    const dayOfWeek = days[now.getUTCDay()];
+    const tz = timezones[timezone] || 'UTC';
     
-    // ISO format
-    const dateTime = now.toISOString();
+    // Get time in requested timezone
+    const dateTime = new Date(now.toLocaleString('en-US', { timeZone: tz }));
     
-    // Response object (same format as timeapi.io)
     const response = {
-        year: parseInt(utcYear),
-        month: parseInt(utcMonth),
-        day: parseInt(utcDay),
-        hour: parseInt(utcHour),
-        minute: parseInt(utcMinute),
-        seconds: parseInt(utcSeconds),
-        milliSeconds: parseInt(utcMilliseconds),
-        dateTime: dateTime,
-        date: `${utcMonth}/${utcDay}/${utcYear}`,
-        time: `${utcHour}:${utcMinute}`,
-        timeZone: "UTC",
-        dayOfWeek: dayOfWeek,
+        year: dateTime.getFullYear(),
+        month: dateTime.getMonth() + 1,
+        day: dateTime.getDate(),
+        hour: dateTime.getHours(),
+        minute: dateTime.getMinutes(),
+        seconds: dateTime.getSeconds(),
+        milliSeconds: dateTime.getMilliseconds(),
+        dateTime: dateTime.toISOString(),
+        date: dateTime.toLocaleDateString('en-US'),
+        time: `${String(dateTime.getHours()).padStart(2, '0')}:${String(dateTime.getMinutes()).padStart(2, '0')}`,
+        timeZone: timezone,
+        dayOfWeek: ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][dateTime.getDay()],
         dstActive: false
     };
     
-    res.json(response);
-});
-
-app.listen(port, () => {
-    console.log(`API running at http://localhost:${port}/api/current-utc`);
-});
+    // CORS
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.status(200).json(response);
+};
