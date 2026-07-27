@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🌍 UTC Clock</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+        }
+        .card {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 { color: #333; margin-bottom: 20px; }
+        .time {
+            font-size: 4rem;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            color: #667eea;
+        }
+        .date { font-size: 1.5rem; color: #555; margin: 10px 0; }
+        .info { color: #777; font-size: 1rem; }
+        .json {
+            background: #2d3748;
+            color: #68d391;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: left;
+            font-size: 0.8rem;
+            overflow-x: auto;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        button:hover { background: #764ba2; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🌍 UTC Clock</h1>
+        <div class="time" id="clock">--:--:--</div>
+        <div class="date" id="date">Loading...</div>
+        <div class="info" id="info">UTC</div>
+        <button onclick="fetchTime()">🔄 Refresh</button>
+        <div class="json" id="json">Loading...</div>
+    </div>
+
+    <script>
+        async function fetchTime() {
+            try {
+                const res = await fetch('/api/current-utc.js');
+                const data = await res.json();
+                
+                document.getElementById('clock').textContent = 
+                    `${String(data.hour).padStart(2,'0')}:${String(data.minute).padStart(2,'0')}:${String(data.seconds).padStart(2,'0')}`;
+                document.getElementById('date').textContent = `${data.dayOfWeek}, ${data.date}`;
+                document.getElementById('info').textContent = `🕐 ${data.timeZone}`;
+                document.getElementById('json').textContent = JSON.stringify(data, null, 2);
+            } catch(e) {
+                document.getElementById('json').textContent = '❌ Error: ' + e.message;
+            }
+        }
+        
+        fetchTime();
+        setInterval(fetchTime, 1000); // Update every second
+    </script>
+</body>
+</html>
