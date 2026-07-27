@@ -2,13 +2,25 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>🌍 Auto Timezone Clock</title>
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <style>
+        /* ===== DISABLE ZOOM ===== */
+        * {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            touch-action: manipulation;
+        }
+        
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             min-height: 100vh;
@@ -17,7 +29,6 @@
             justify-content: center;
             align-items: center;
             padding: 16px;
-            overflow: hidden;
         }
         .card {
             background: rgba(255,255,255,0.05);
@@ -30,7 +41,6 @@
             width: 100%;
             text-align: center;
             box-shadow: 0 30px 80px rgba(0,0,0,0.6);
-            transition: all 0.3s;
         }
         .logo { font-size: 2.5rem; margin-bottom: 6px; }
         h1 {
@@ -46,7 +56,8 @@
             letter-spacing: 1px;
             margin-bottom: 20px;
         }
-        /* ===== TIME DISPLAY - FIXED SIZE ===== */
+        
+        /* ===== TIME DISPLAY ===== */
         .time-wrapper {
             background: rgba(0,0,0,0.3);
             border-radius: 16px;
@@ -63,17 +74,25 @@
             letter-spacing: 3px;
             line-height: 1.2;
             white-space: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
         }
         .time .colon {
             color: #6366f1;
             animation: blink 1s step-end infinite;
         }
         .time .ampm {
-            font-size: clamp(1rem, 4vw, 1.4rem);
+            font-size: clamp(1.2rem, 4.5vw, 1.6rem);
             color: #818cf8;
-            font-weight: 600;
-            margin-left: 4px;
+            font-weight: 700;
+            margin-left: 6px;
             letter-spacing: 1px;
+            background: rgba(99,102,241,0.1);
+            padding: 2px 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(99,102,241,0.15);
         }
         @keyframes blink {
             0%, 100% { opacity: 1; }
@@ -105,7 +124,8 @@
             margin-top: 12px;
             letter-spacing: 0.5px;
         }
-        /* ===== JSON BOX - SCROLLABLE ===== */
+        
+        /* ===== JSON BOX ===== */
         .json-box {
             background: rgba(0,0,0,0.4);
             border-radius: 12px;
@@ -139,6 +159,7 @@
             font-size: 0.55rem;
             letter-spacing: 1px;
         }
+        
         /* ===== RESPONSIVE ===== */
         @media (max-width: 480px) {
             .card { padding: 24px 16px; border-radius: 20px; }
@@ -147,22 +168,34 @@
             h1 { font-size: 1.1rem; }
             .badge { font-size: 0.55rem; padding: 3px 12px; }
             .json-box { max-height: 80px; font-size: 0.5rem; padding: 10px 12px; }
+            .time .ampm { 
+                font-size: 1rem; 
+                padding: 2px 8px;
+                margin-left: 4px;
+            }
         }
         @media (max-width: 360px) {
             .card { padding: 18px 12px; }
-            .time { font-size: 2.4rem; letter-spacing: 1px; }
-            .time .ampm { font-size: 0.9rem; }
+            .time { font-size: 2.4rem; letter-spacing: 1px; gap: 0px; }
+            .time .ampm { font-size: 0.85rem; padding: 1px 6px; }
+            .time .colon { margin: 0 -2px; }
         }
         @media (min-width: 768px) {
             .card { padding: 40px 36px; max-width: 480px; }
             .time { font-size: 4.5rem; }
+            .time .ampm { font-size: 1.8rem; padding: 4px 14px; }
         }
-        /* ===== LOADING ===== */
-        .loading { color: rgba(255,255,255,0.2); font-size: 0.9rem; }
+        
+        /* ===== DISABLE TEXT SELECTION ===== */
+        .no-select {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
     </style>
 </head>
 <body>
-    <div class="card">
+    <div class="card no-select">
         <div class="logo">🌍</div>
         <h1>Auto Timezone Clock</h1>
         <div class="sub">Detected via your network</div>
@@ -170,8 +203,10 @@
         <!-- ===== TIME DISPLAY ===== -->
         <div class="time-wrapper">
             <div class="time" id="clock">
-                <span id="hours">--</span><span class="colon">:</span>
-                <span id="minutes">--</span><span class="colon">:</span>
+                <span id="hours">--</span>
+                <span class="colon">:</span>
+                <span id="minutes">--</span>
+                <span class="colon">:</span>
                 <span id="seconds">--</span>
                 <span class="ampm" id="ampm">--</span>
             </div>
@@ -187,11 +222,19 @@
     </div>
 
     <script>
+        // ===== DISABLE ZOOM (Pinch & Double Tap) =====
+        document.addEventListener('gesturestart', function(e) { e.preventDefault(); });
+        document.addEventListener('gesturechange', function(e) { e.preventDefault(); });
+        document.addEventListener('gestureend', function(e) { e.preventDefault(); });
+        document.addEventListener('touchstart', function(e) {
+            if (e.touches.length > 1) { e.preventDefault(); }
+        }, { passive: false });
+        
         // ===== CONFIG =====
         const API_URL = '/api/current-utc.js';
         let intervalId = null;
 
-        // ===== 12-HOUR FORMAT FUNCTION =====
+        // ===== 12-HOUR FORMAT =====
         function to12Hour(hour) {
             const h = hour % 12 || 12;
             const ampm = hour >= 12 ? 'PM' : 'AM';
@@ -221,13 +264,11 @@
                 const m = String(data.minute).padStart(2, '0');
                 const s = String(data.seconds).padStart(2, '0');
                 
-                // Update clock
                 document.getElementById('hours').textContent = h;
                 document.getElementById('minutes').textContent = m;
                 document.getElementById('seconds').textContent = s;
                 document.getElementById('ampm').textContent = ampm;
                 
-                // Date & Timezone
                 document.getElementById('date').textContent = 
                     `${data.dayOfWeek}, ${data.date}`;
                 document.getElementById('tz').textContent = 
@@ -235,7 +276,6 @@
                 document.getElementById('status').textContent = '✅ Auto-Detected';
                 document.getElementById('status').style.borderColor = '#34d399';
                 
-                // JSON
                 document.getElementById('json').textContent = 
                     JSON.stringify(data, null, 2);
                     
@@ -249,7 +289,6 @@
         // ===== TAB FOCUS FIX =====
         document.addEventListener('visibilitychange', function() {
             if (!document.hidden) {
-                console.log('🔄 Tab focused - Refreshing...');
                 clearInterval(intervalId);
                 fetchTime();
                 intervalId = setInterval(fetchTime, 1000);
@@ -260,15 +299,13 @@
         fetchTime();
         intervalId = setInterval(fetchTime, 1000);
 
-        // ===== BACK/FORWARD CACHE FIX =====
         window.addEventListener('pageshow', function(event) {
             if (event.persisted) {
-                console.log('🔄 Page from cache - Refreshing...');
                 fetchTime();
             }
         });
 
-        console.log('✅ 12-Hour Clock started');
+        console.log('✅ 12-Hour Clock | Zoom Disabled | AM/PM Styled');
     </script>
 </body>
 </html>
