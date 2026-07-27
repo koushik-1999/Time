@@ -8,7 +8,11 @@
   ],
   "routes": [
     {
-      "src": "/(.*)",
+      "src": "/",
+      "dest": "/api/current-utc"
+    },
+    {
+      "src": "/api/current-utc",
       "dest": "/api/current-utc"
     }
   ]
