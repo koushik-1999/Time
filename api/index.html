@@ -5,159 +5,420 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🌍 Auto Timezone Clock</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             min-height: 100vh;
-            background: linear-gradient(135deg, #0a0a0f, #1a1a2e);
+            background: linear-gradient(135deg, #0a0a0f, #1a1a2e, #16213e);
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 16px;
+            overflow: hidden;
         }
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background:
+                radial-gradient(circle at 30% 40%, rgba(99, 102, 241, 0.12) 0%, transparent 50%),
+                radial-gradient(circle at 70% 60%, rgba(139, 92, 246, 0.10) 0%, transparent 50%);
+            animation: rotateBg 30s linear infinite;
+            z-index: 0;
+        }
+
+        @keyframes rotateBg {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         .card {
-            background: rgba(255,255,255,0.05);
+            position: relative;
+            z-index: 1;
+            background: rgba(255, 255, 255, 0.04);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 32px;
-            padding: 48px 40px;
-            max-width: 500px;
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 28px;
+            padding: 32px 28px;
+            max-width: 460px;
             width: 100%;
             text-align: center;
-            box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+            transition: transform 0.3s ease;
         }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
         .logo {
-            font-size: 3rem;
-            margin-bottom: 10px;
+            font-size: 1.8rem;
+            line-height: 1;
         }
-        h1 {
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 14px;
+            background: rgba(52, 211, 153, 0.10);
+            border: 1px solid rgba(52, 211, 153, 0.15);
+            border-radius: 20px;
+            color: #34d399;
+            font-size: 0.6rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .status-dot {
+            width: 5px;
+            height: 5px;
+            background: #34d399;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%,
+            100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.7); }
+        }
+
+        /* ===== TITLE ===== */
+        .title {
             color: #fff;
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             font-weight: 300;
-            letter-spacing: 2px;
-            margin-bottom: 8px;
+            letter-spacing: 1.5px;
+            margin-bottom: 2px;
         }
+
         .sub {
-            color: rgba(255,255,255,0.3);
-            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.25);
+            font-size: 0.7rem;
             letter-spacing: 1px;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
+
+        /* ===== CLOCK ===== */
+        .time-wrapper {
+            padding: 8px 0;
+        }
+
         .time {
             font-family: 'Courier New', monospace;
-            font-size: 4.5rem;
+            font-size: clamp(3.2rem, 14vw, 4.8rem);
             font-weight: 700;
             color: #fff;
-            text-shadow: 0 0 40px rgba(99,102,241,0.2);
-            letter-spacing: 4px;
-            margin: 20px 0;
+            text-shadow: 0 0 40px rgba(99, 102, 241, 0.15);
+            letter-spacing: 2px;
+            line-height: 1.1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2px;
+            flex-wrap: wrap;
         }
-        .time span {
+
+        .time .ampm {
+            font-size: clamp(1rem, 4vw, 1.4rem);
+            font-weight: 600;
+            color: #818cf8;
+            background: rgba(99, 102, 241, 0.12);
+            padding: 2px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(99, 102, 241, 0.10);
+            margin-left: 6px;
+            letter-spacing: 1px;
+        }
+
+        .time .colon {
             color: #6366f1;
             animation: blink 1s step-end infinite;
+            padding: 0 1px;
         }
+
         @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.2; }
+            0%,
+            100% { opacity: 1; }
+            50% { opacity: 0.15; }
         }
+
+        /* ===== DATE & TZ ===== */
         .date {
-            color: rgba(255,255,255,0.7);
-            font-size: 1.2rem;
-            margin-bottom: 6px;
-        }
-        .tz-info {
-            color: rgba(255,255,255,0.4);
-            font-size: 0.9rem;
-            letter-spacing: 2px;
-            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.75);
+            font-size: clamp(1rem, 3.5vw, 1.2rem);
+            font-weight: 400;
             margin-top: 4px;
+            letter-spacing: 0.5px;
         }
+
+        .tz-info {
+            color: rgba(255, 255, 255, 0.35);
+            font-size: clamp(0.75rem, 2.5vw, 0.85rem);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+
+        /* ===== BADGE ===== */
         .badge {
             display: inline-block;
             padding: 4px 16px;
-            background: rgba(52,211,153,0.12);
-            border: 1px solid rgba(52,211,153,0.2);
+            background: rgba(99, 102, 241, 0.08);
+            border: 1px solid rgba(99, 102, 241, 0.12);
             border-radius: 20px;
-            color: #34d399;
-            font-size: 0.7rem;
-            font-weight: 600;
-            margin-top: 16px;
+            color: #a5b4fc;
+            font-size: 0.6rem;
+            font-weight: 500;
+            margin-top: 12px;
+            letter-spacing: 0.5px;
         }
+
+        /* ===== JSON ===== */
         .json-box {
-            background: rgba(0,0,0,0.4);
-            border-radius: 14px;
-            padding: 16px;
-            margin-top: 24px;
+            background: rgba(0, 0, 0, 0.40);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-top: 20px;
             text-align: left;
             font-family: 'Courier New', monospace;
-            font-size: 0.7rem;
+            font-size: 0.6rem;
             color: #a5b4fc;
             overflow-x: auto;
-            max-height: 120px;
+            max-height: 100px;
             overflow-y: auto;
+            line-height: 1.6;
         }
+
+        .json-box::-webkit-scrollbar {
+            width: 3px;
+        }
+        .json-box::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .json-box::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.25);
+            border-radius: 10px;
+        }
+
+        /* ===== FOOTER ===== */
         .footer {
-            margin-top: 20px;
-            color: rgba(255,255,255,0.1);
-            font-size: 0.6rem;
+            margin-top: 14px;
+            color: rgba(255, 255, 255, 0.08);
+            font-size: 0.55rem;
             letter-spacing: 1px;
         }
-        .loading {
-            color: rgba(255,255,255,0.3);
-            font-size: 1rem;
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 480px) {
+            .card {
+                padding: 24px 16px;
+                border-radius: 22px;
+            }
+
+            .header {
+                margin-bottom: 10px;
+            }
+
+            .logo {
+                font-size: 1.4rem;
+            }
+
+            .title {
+                font-size: 1rem;
+            }
+
+            .time {
+                font-size: clamp(2.6rem, 13vw, 3.8rem);
+                letter-spacing: 1px;
+            }
+
+            .time .ampm {
+                font-size: 0.8rem;
+                padding: 1px 10px;
+                margin-left: 4px;
+            }
+
+            .json-box {
+                font-size: 0.5rem;
+                padding: 10px 12px;
+                max-height: 80px;
+            }
+
+            .badge {
+                font-size: 0.5rem;
+                padding: 3px 12px;
+                margin-top: 8px;
+            }
+
+            .sub {
+                font-size: 0.6rem;
+                margin-bottom: 12px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .card {
+                padding: 18px 12px;
+            }
+
+            .time {
+                font-size: clamp(2rem, 12vw, 3rem);
+            }
+
+            .time .ampm {
+                font-size: 0.65rem;
+                padding: 1px 8px;
+            }
+
+            .date {
+                font-size: 0.8rem;
+            }
+
+            .tz-info {
+                font-size: 0.6rem;
+            }
+        }
+
+        /* Landscape phones */
+        @media (max-height: 600px) and (orientation: landscape) {
+            .card {
+                padding: 16px 20px;
+                max-width: 400px;
+            }
+
+            .time {
+                font-size: 2.6rem;
+            }
+
+            .json-box {
+                max-height: 60px;
+                margin-top: 12px;
+                padding: 8px 12px;
+            }
+
+            .title {
+                font-size: 0.9rem;
+            }
+
+            .sub {
+                margin-bottom: 8px;
+                font-size: 0.55rem;
+            }
+
+            .badge {
+                margin-top: 6px;
+            }
+
+            .footer {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
+
     <div class="card">
-        <div class="logo">🌍</div>
-        <h1>Auto Timezone Clock</h1>
-        <div class="sub">Detected via your network location</div>
-        
-        <div class="time" id="clock">--<span>:</span>--<span>:</span>--</div>
+        <!-- Header -->
+        <div class="header">
+            <span class="logo">🌍</span>
+            <div class="status-badge">
+                <span class="status-dot"></span>
+                LIVE
+            </div>
+        </div>
+
+        <!-- Title -->
+        <div class="title">Auto Timezone Clock</div>
+        <div class="sub">Detected via your network</div>
+
+        <!-- Clock -->
+        <div class="time-wrapper">
+            <div class="time" id="clock">
+                00<span class="colon">:</span>00<span class="colon">:</span>00
+                <span class="ampm" id="ampm">AM</span>
+            </div>
+        </div>
+
         <div class="date" id="date">Loading...</div>
         <div class="tz-info" id="tz">Detecting...</div>
+
         <div class="badge" id="status">🔄 Auto-Detecting</div>
-        
+
+        <!-- JSON -->
         <div class="json-box" id="json">Loading...</div>
+
+        <!-- Footer -->
         <div class="footer">⚡ Powered by IP Geolocation</div>
     </div>
 
     <script>
         const API_URL = '/api/current-utc.js';
-        
+
+        function format12Hour(hours) {
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            const h = hours % 12 || 12;
+            return { hours: h, ampm: ampm };
+        }
+
         async function fetchTime() {
             try {
                 const res = await fetch(API_URL);
                 const data = await res.json();
-                
-                // Update clock
-                const h = String(data.hour).padStart(2, '0');
+
+                // 12-hour format
+                const { hours: h12, ampm } = format12Hour(data.hour);
+
+                const h = String(h12).padStart(2, '0');
                 const m = String(data.minute).padStart(2, '0');
                 const s = String(data.seconds).padStart(2, '0');
-                document.getElementById('clock').innerHTML = 
-                    `${h}<span>:</span>${m}<span>:</span>${s}`;
-                
-                document.getElementById('date').textContent = 
+
+                document.getElementById('clock').innerHTML =
+                    `${h}<span class="colon">:</span>${m}<span class="colon">:</span>${s} <span class="ampm">${ampm}</span>`;
+
+                document.getElementById('date').textContent =
                     `${data.dayOfWeek}, ${data.date}`;
-                document.getElementById('tz').textContent = 
+
+                document.getElementById('tz').textContent =
                     `📍 ${data.timeZone}`;
-                document.getElementById('status').textContent = 
-                    '✅ Auto-Detected';
-                document.getElementById('status').style.borderColor = '#34d399';
-                
-                document.getElementById('json').textContent = 
+
+                document.getElementById('status').textContent = '✅ Auto-Detected';
+                document.getElementById('status').style.borderColor = 'rgba(52,211,153,0.3)';
+
+                document.getElementById('json').textContent =
                     JSON.stringify(data, null, 2);
-                    
+
             } catch (e) {
-                document.getElementById('json').textContent = 
+                document.getElementById('json').textContent =
                     '❌ Error: ' + e.message;
                 document.getElementById('status').textContent = '⚠️ Error';
             }
         }
-        
+
         fetchTime();
         setInterval(fetchTime, 1000);
     </script>
+
 </body>
 </html>
