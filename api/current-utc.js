@@ -1,4 +1,8 @@
-module.exports = (req, res) => {
+const express = require('express');
+const app = express();
+const port = 3000;
+
+app.get('/api/current-utc', (req, res) => {
     const now = new Date();
     
     // UTC time components
@@ -17,7 +21,7 @@ module.exports = (req, res) => {
     // ISO format
     const dateTime = now.toISOString();
     
-    // Response object
+    // Response object (same format as timeapi.io)
     const response = {
         year: parseInt(utcYear),
         month: parseInt(utcMonth),
@@ -34,5 +38,9 @@ module.exports = (req, res) => {
         dstActive: false
     };
     
-    res.status(200).json(response);
-};
+    res.json(response);
+});
+
+app.listen(port, () => {
+    console.log(`API running at http://localhost:${port}/api/current-utc`);
+});
