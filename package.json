@@ -1,0 +1,6 @@
+{
+  "name": "my-utc-api",
+  "version": "1.0.0",
+  "description": "Real-time UTC API for Vercel",
+  "main": "api/current-utc.js"
+}
