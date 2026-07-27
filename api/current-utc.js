@@ -3,7 +3,7 @@ module.exports = async (req, res) => {
     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '';
     const clientIp = ip.split(',')[0].trim();
     
-    let timezone = 'UTC'; // Default
+    let timezone = 'UTC'; // Default fallback
     
     try {
         // Fetch timezone from ip-api.com (free, no API key)
@@ -35,9 +35,10 @@ module.exports = async (req, res) => {
         timeZone: timezone,
         dayOfWeek: ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][dateTime.getDay()],
         dstActive: false,
-        detectedIp: clientIp // Optional: show IP
+        detectedIp: clientIp // Optional
     };
     
+    // CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.status(200).json(response);
 };
